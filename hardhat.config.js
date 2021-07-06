@@ -21,7 +21,7 @@ module.exports = {
   networks: {
     hardhat: {
       forking: {
-        url: "https://parity0.mainnet.makerfoundation.com:8545",
+        url: "",
         blockNumber:12775088,
       }
     }
