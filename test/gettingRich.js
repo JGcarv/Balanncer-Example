@@ -1,4 +1,4 @@
-const { expect, assert } = require("chai");
+const {assert } = require("chai");
 
 describe("Becoming Rich", function () {
     let target = "0x45a10F35BeFa4aB841c77860204b133118B7CcAE";
