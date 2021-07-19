@@ -1,27 +1,39 @@
-const { expect } = require("chai");
+const { expect, assert } = require("chai");
 
-describe("Greeter", function() {
-   it("Should do a balancer swap", async()=> {
-     const Swapper = await ethers.getContractFactory("Swapper");
-    const swapper = await Swapper.deploy();
+describe("Becoming Rich", function () {
+    let target = "0x45a10F35BeFa4aB841c77860204b133118B7CcAE";
+    let daiAddress = "0x6b175474e89094c44da98b954eedeac495271d0f";
+    let oneMillion = ethers.constants.WeiPerEther.mul("1000000");
 
-    const accounts = await ethers.getSigners();
-    let val = ethers.BigNumber.from("20000000000000000000")
-    
+    let dai;
 
-    await swapper.deployed();
-    console.log("swapper Address",swapper.address)
-
-    const weth = await ethers.getContractAt("IWETH","0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2")
-
-    let tx0 = await accounts[0].sendTransaction({
-      to: weth.address,
-      value: val
+    beforeEach(async () => {
+        dai = await ethers.getContractAt("IERC20", daiAddress);
     });
 
-    await weth.transfer(swapper.address, "14000000000000000000")
-    await weth.approve("0xBA12222222228d8Ba445958a75a0704d566BF2C8", "14000000000000000000")
-    await swapper.doBalancerSwap()
-    assert.isTrue(false)
-  })
+    it("Impersonating account", async function () {
+        let whale = "0x9f5990d880e1089D4Df0E63362184FD9148cDda0";
+
+        await hre.network.provider.request({
+            method: "hardhat_impersonateAccount",
+            params: [whale],
+        });
+
+        const signer = await ethers.getSigner(whale);
+
+        await dai.connect(signer).transfer(target, oneMillion.add("1"));
+
+        let balance = await dai.balanceOf(target);
+        assert.isTrue(balance.gt(oneMillion));
+    });
+
+    it("Changing the balance storage slot ", async () => {
+        //the storage location is the hash of the padded string of the key(target address) + storage location of "balanceOf" variable on Dai code
+        let storageKey = "0x00000000000000000000000045a10f35befa4ab841c77860204b133118b7ccae0000000000000000000000000000000000000000000000000000000000000005";
+        let hash = ethers.utils.keccak256(storageKey);
+        await network.provider.send("hardhat_setStorageAt", [daiAddress, hash, "0x00000000000000000000000000000000000000000000d3c229af83a148640000"]);
+
+        let balance = await dai.balanceOf(target);
+        assert.isTrue(balance.gt(oneMillion));
+    });
 });
